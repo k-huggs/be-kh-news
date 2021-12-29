@@ -47,7 +47,7 @@ exports.selectArticles = async (sort = "created_at", order = "DESC", topic) => {
     return Promise.reject({ status: 400, msg: "Invalid Sort Query" });
   }
 
-  let queryStr = `SELECT articles.*, COUNT(comment_id)::int AS comment_count FROM articles LEFT JOIN comments ON comments.article_id = articles.article_id`;
+  let queryStr = `SELECT articles.article_id, articles.title, articles.votes, articles.topic, articles.author, articles.created_at, COUNT(comment_id)::int AS comment_count FROM articles LEFT JOIN comments ON comments.article_id = articles.article_id`;
 
   if (topic) {
     queryStr += ` WHERE topic = %L`;
@@ -58,6 +58,5 @@ exports.selectArticles = async (sort = "created_at", order = "DESC", topic) => {
   }
 
   const res = await db.query(format(queryStr, topic));
-  console.log(res.rows);
   return res.rows;
 };

@@ -37,14 +37,16 @@ exports.patchArticleVotesByArticleId = async (req, res, next) => {
 
 exports.getArticles = async (req, res, next) => {
   try {
-    const sort = req.query.sort;
+    const sort = req.query.sort_by;
     const order = req.query.order;
     const topic = req.query.topic;
 
-    const [check, articles] = await Promise.all([
-      checkTopics,
+    const [articles, check] = await Promise.all([
       selectArticles(sort, order, topic),
+      checkTopics(topic),
     ]);
+
+    console.log(articles);
     res.status(200).send({ articles });
   } catch (err) {
     next(err);
