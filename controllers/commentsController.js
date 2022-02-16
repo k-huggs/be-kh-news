@@ -1,7 +1,7 @@
 const { checkArticleId } = require("../models/articlesModel");
 const {
   selectCommentsByArticleId,
-  postCommentByArticleId,
+  addCommentByArticleId,
 } = require("../models/commentsModel");
 
 exports.getCommentsByReviewId = async (req, res, next) => {
@@ -15,19 +15,23 @@ exports.getCommentsByReviewId = async (req, res, next) => {
 
     res.status(200).send({ comments });
   } catch (err) {
-    console.log(err);
     next(err);
   }
 };
 
 exports.postCommentByArticleId = async (req, res, next) => {
-  const username = req.body.username;
-  const comment = req.body.comment;
-  const articleId = req.params.article_id;
+  try {
+    const username = req.body.username;
+    const body = req.body.body;
+    const articleId = req.params.article_id;
 
-  const [newComment, check] = Promise.all([
-    checkArticleId(articleId),
-    addCommentByArticleId(username, comment, articleId),
-  ]);
-  res.status(201).send({ newComment });
+    const [[newComment], check] = await Promise.all([
+      addCommentByArticleId(username, body, articleId),
+      checkArticleId(articleId),
+    ]);
+    console.log(newComment, "<<< controller");
+    res.status(201).send({ newComment });
+  } catch (err) {
+    next(err);
+  }
 };

@@ -46,7 +46,6 @@ exports.getArticles = async (req, res, next) => {
       checkTopics(topic),
     ]);
 
-    console.log(articles);
     res.status(200).send({ articles });
   } catch (err) {
     next(err);

@@ -288,12 +288,14 @@ describe("GET /api/articles/:article_id/comments", () => {
   });
 });
 
-describe("POST /api/articles/:article_id/comments", () => {
+describe.only("POST /api/articles/:article_id/comments", () => {
   test("status 201, accepts an object with the username and comment body and responds with the posted comment", async () => {
     const body = { username: "lurker", body: "it's lit y'all" };
-    const res = await (await request(app).post("/api/articles/2/comments"))
+    const res = await request(app)
+      .post("/api/articles/2/comments")
       .send(body)
       .expect(201);
-    expect(res.body.newComment).toBe("it's lit y'all");
+    console.log(res.body.newComment);
+    expect(res.body.newComment.body).toBe("it's lit y'all");
   });
 });
