@@ -288,14 +288,71 @@ describe("GET /api/articles/:article_id/comments", () => {
   });
 });
 
-describe.only("POST /api/articles/:article_id/comments", () => {
+describe("POST /api/articles/:article_id/comments", () => {
   test("status 201, accepts an object with the username and comment body and responds with the posted comment", async () => {
     const body = { username: "lurker", body: "it's lit y'all" };
     const res = await request(app)
       .post("/api/articles/2/comments")
       .send(body)
       .expect(201);
-    console.log(res.body.newComment);
-    expect(res.body.newComment.body).toBe("it's lit y'all");
+      const { newComment } = res.body
+      console.log(newComment)
+    expect(newComment.body).toBe("it's lit y'all");
   });
+  test("status 201, accepts an object with unnecessary properties and returns the posted comment", async () => {
+const body = {username: "lurker", body: "it's lit y'all", id: 2}
+const res = await request(app)
+.post("/api/articles/2/comments")
+.send(body)
+.expect(201)
+const { newComment } = res.body;
+expect(newComment.body).toBe("it's lit y'all")
+  })
+  test("status 400, invalid ID, e.g. string of 'not and ID'", async () => {
+    const body = {username: "lurker", body: "new fit just dropped"}
+    const res = await request(app)
+    .post("/api/articles/notanID/comments")
+    .send(body)
+    .expect(400)
+    expect(res.body.msg).toBe("Invalid Server Request Made, Expected Number Not String")
+  })
+test("status 404, non existant ID, i.e. 0 or 90000", async () => {
+  const body = {username: "lurker", body: "new fit just dropped"}
+  const res = await request(app)
+  .post("/api/articles/9000/comments")
+    .send(body)
+    .expect(404)
+    expect(res.body.msg).toBe("Not Found")
+})
+
+test("status 400, missing required fields e.g. no username or body", async () => {
+  const body = {username: 'lurker'}
+  const res = await request(app)
+  .post("/api/articles/2/comments")
+  .send(body)
+  .expect(400)
+  expect(res.body.msg).toBe("Missing Required Field, Body or Username")
+})
 });
+
+describe("DELETE /api/comments/:comment_id", () => {
+  test("status 204, deletes comment from database", async () => {
+    const res = await request(app)
+    .delete("/api/comments/2")
+    .expect(204)
+  })
+
+  test("status 404, non existent ID", async () => {
+    const res = await request(app)
+    .delete("/api/comments/99999")
+    .expect(404)
+    expect(res.body.msg).toBe("Comment Not Found")
+  })
+
+  test("status 400, invalid ID", async () => {
+    const res = await request(app)
+  .delete("/api/comments/notanid")
+  .expect(400)
+  expect(res.body.msg).toBe("Invalid Server Request Made, Expected Number Not String")
+  })
+})

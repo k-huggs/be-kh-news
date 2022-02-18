@@ -9,10 +9,24 @@ exports.selectCommentsByArticleId = async (articleId) => {
 };
 
 exports.addCommentByArticleId = async (username, comment, articleId) => {
+  if (!username || !comment) {
+    return await Promise.reject({status: 400, msg: "Missing Required Field, Body or Username"})
+  }
+  
   const res = await db.query(
     `INSERT INTO comments (author, body, article_id) VALUES ($1, $2, $3) RETURNING author, body, article_id;`,
     [username, comment, articleId]
   );
-
-  return res.rows;
+  if (res.rows.length === 0) {
+    Promise.reject({status: 404, msg: "URL Route Has Not Been Found"})
+  }
+  return  res.rows[0];
 };
+
+exports.removeCommentByCommentId = async (commentId) => {
+  
+  const numberOfDeletions = await (await db.query(`DELETE FROM comments WHERE comment_id = $1`, [commentId]))
+  if (numberOfDeletions.rowCount === 0) {
+    return Promise.reject({status: 404, msg: "Comment Not Found"})
+  }
+}

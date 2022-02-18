@@ -6,7 +6,7 @@ const {
 } = require("../controllers/articlesController");
 
 const {
-  getCommentsByReviewId,
+  getCommentsByArticleId,
   postCommentByArticleId,
 } = require("../controllers/commentsController");
 
@@ -19,7 +19,7 @@ articlesRouter.get("/", getArticles);
 
 articlesRouter
   .route("/:article_id/comments")
-  .get(getCommentsByReviewId)
+  .get(getCommentsByArticleId)
   .post(postCommentByArticleId);
 
 module.exports = articlesRouter;

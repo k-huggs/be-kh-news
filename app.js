@@ -13,7 +13,7 @@ app.use("/api", apiRouter);
 
 app.use("*", handleCustomErrors);
 app.use(handlePSQLErrors);
-app.use(handleRouteNotFoundErrors);
+app.use("/*", handleRouteNotFoundErrors);
 app.use(handleServerErrors);
 
 module.exports = app;
