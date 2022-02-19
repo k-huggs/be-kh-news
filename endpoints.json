@@ -23,5 +23,42 @@
         }
       ]
     }
-  }
+  },
+  "PATCH /api/articles/:article_id": {
+    "description": "adds votes to the article specified by article id",
+    "exampleInput": {"inc_votes": 1 },
+    "exampleResponse":  {
+        "title": "Living in the shadow of a great man",
+        "topic": "mitch",
+        "author": "butter_bridge",
+        "body": "I find this existence challenging",
+        "created_at": 1594329060000,
+        "votes": 101
+    }
+  },
+  "GET /api/articles/:article_id/comments": {
+    "description": "returns an array of all comments for given article",
+    "exampleResponse": [
+      {
+        
+          "comment_id": 2,
+          "author": "butter_bridge",
+          "article_id": 1,
+          "votes": 14,
+          "created_at": "2020-10-31T00:00:00.000Z",
+          "body": "The beautiful thing about treasure is that it exists. Got to find out what kind of sheets these are; not cotton, not rayon, silky."
+        
+      }
+    ]
+  },
+  "POST /api/articles/:article_id/comments": {
+    "description": "adds a comment to the comment section of specified article",
+    "exampleInput": {"username": "butter_bridge", "body": "it's lit y'all"},
+    "exampleResponse": {"newComment": "it's lit y'all"}
+  },
+
+"DELETE /api/comments/:comment_id": {
+  "description": "removes a comment specified by comment ID",
+  "exampleResponse": {}
+}
 }

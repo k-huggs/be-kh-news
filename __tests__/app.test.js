@@ -253,9 +253,10 @@ describe("GET /api/articles", () => {
 });
 
 describe("GET /api/articles/:article_id/comments", () => {
-  test("status 200, responds with an array of comments for a given article_id", async () => {
+  test.only("status 200, responds with an array of comments for a given article_id", async () => {
     const res = await request(app).get("/api/articles/1/comments").expect(200);
     expect(Array.isArray(res.body.comments)).toBe(true);
+    console.log(res.body.comments[0])
     expect(res.body.comments).toHaveLength(11);
     res.body.comments.forEach((comment) => {
       expect(comment).toEqual(
@@ -354,5 +355,21 @@ describe("DELETE /api/comments/:comment_id", () => {
   .delete("/api/comments/notanid")
   .expect(400)
   expect(res.body.msg).toBe("Invalid Server Request Made, Expected Number Not String")
+  })
+})
+
+describe("GET /api", () => {
+  test("status 200: returns JSON describing all endpoints", async () => {
+    const res = await request(app).get('/api').expect(200)
+    expect(res.body.endpoints).toBeInstanceOf(Object);
+    expect(res.body.endpoints).toEqual(expect.objectContaining({
+      "GET /api": expect.any(Object),
+      "GET /api/topics": expect.any(Object),
+      "GET /api/articles": expect.any(Object),
+      "PATCH /api/articles/:article_id": expect.any(Object),
+      "GET /api/articles/:article_id/comments": expect.any(Object),
+      "POST /api/articles/:article_id/comments": expect.any(Object),
+      "DELETE /api/comments/:comment_id": expect.any(Object),
+    }))
   })
 })
