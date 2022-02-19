@@ -373,3 +373,11 @@ describe("GET /api", () => {
     }))
   })
 })
+
+describe("GET /api/users", () => {
+  test("status 200, responds with array of user objects", async () => {
+    const res = await request(app).get("/api/users").expect(200)
+    expect(res.body).toBeInstanceOf(Array)
+    expect(res.body)
+  })
+})
