@@ -40,7 +40,6 @@ exports.getArticles = async (req, res, next) => {
     const sort = req.query.sort_by;
     const order = req.query.order;
     const topic = req.query.topic;
-
     const [articles, check] = await Promise.all([
       selectArticles(sort, order, topic),
       checkTopics(topic),

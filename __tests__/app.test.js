@@ -3,6 +3,7 @@ const testData = require("../db/data/test-data/index.js");
 const seed = require("../db/seeds/seed.js");
 const request = require("supertest");
 const app = require("../app");
+const obj = require("../endpoints.json");
 
 beforeEach(() => seed(testData));
 afterAll(() => db.end());
@@ -143,7 +144,7 @@ describe("PATCH /api/articles/:article_id", () => {
   });
 });
 
-describe("GET /api/articles", () => {
+describe.only("GET /api/articles", () => {
   test("status 200: responds with an array of article objects, which can be sorted by column but defaults to date", async () => {
     const res = await request(app).get("/api/articles").expect(200);
     console.log(res.body.articles);
@@ -253,10 +254,9 @@ describe("GET /api/articles", () => {
 });
 
 describe("GET /api/articles/:article_id/comments", () => {
-  test.only("status 200, responds with an array of comments for a given article_id", async () => {
+  test("status 200, responds with an array of comments for a given article_id", async () => {
     const res = await request(app).get("/api/articles/1/comments").expect(200);
     expect(Array.isArray(res.body.comments)).toBe(true);
-    console.log(res.body.comments[0])
     expect(res.body.comments).toHaveLength(11);
     res.body.comments.forEach((comment) => {
       expect(comment).toEqual(
@@ -296,88 +296,105 @@ describe("POST /api/articles/:article_id/comments", () => {
       .post("/api/articles/2/comments")
       .send(body)
       .expect(201);
-      const { newComment } = res.body
-      console.log(newComment)
+    const { newComment } = res.body;
+    console.log(newComment);
     expect(newComment.body).toBe("it's lit y'all");
   });
   test("status 201, accepts an object with unnecessary properties and returns the posted comment", async () => {
-const body = {username: "lurker", body: "it's lit y'all", id: 2}
-const res = await request(app)
-.post("/api/articles/2/comments")
-.send(body)
-.expect(201)
-const { newComment } = res.body;
-expect(newComment.body).toBe("it's lit y'all")
-  })
-  test("status 400, invalid ID, e.g. string of 'not and ID'", async () => {
-    const body = {username: "lurker", body: "new fit just dropped"}
+    const body = { username: "lurker", body: "it's lit y'all", id: 2 };
     const res = await request(app)
-    .post("/api/articles/notanID/comments")
-    .send(body)
-    .expect(400)
-    expect(res.body.msg).toBe("Invalid Server Request Made, Expected Number Not String")
-  })
-test("status 404, non existant ID, i.e. 0 or 90000", async () => {
-  const body = {username: "lurker", body: "new fit just dropped"}
-  const res = await request(app)
-  .post("/api/articles/9000/comments")
-    .send(body)
-    .expect(404)
-    expect(res.body.msg).toBe("Not Found")
-})
+      .post("/api/articles/2/comments")
+      .send(body)
+      .expect(201);
+    const { newComment } = res.body;
+    expect(newComment.body).toBe("it's lit y'all");
+  });
+  test("status 400, invalid ID, e.g. string of 'not and ID'", async () => {
+    const body = { username: "lurker", body: "new fit just dropped" };
+    const res = await request(app)
+      .post("/api/articles/notanID/comments")
+      .send(body)
+      .expect(400);
+    expect(res.body.msg).toBe(
+      "Invalid Server Request Made, Expected Number Not String"
+    );
+  });
+  test("status 404, non existant ID, i.e. 0 or 90000", async () => {
+    const body = { username: "lurker", body: "new fit just dropped" };
+    const res = await request(app)
+      .post("/api/articles/9000/comments")
+      .send(body)
+      .expect(404);
+    expect(res.body.msg).toBe("Not Found");
+  });
 
-test("status 400, missing required fields e.g. no username or body", async () => {
-  const body = {username: 'lurker'}
-  const res = await request(app)
-  .post("/api/articles/2/comments")
-  .send(body)
-  .expect(400)
-  expect(res.body.msg).toBe("Missing Required Field, Body or Username")
-})
+  test("status 400, missing required fields e.g. no username or body", async () => {
+    const body = { username: "lurker" };
+    const res = await request(app)
+      .post("/api/articles/2/comments")
+      .send(body)
+      .expect(400);
+    expect(res.body.msg).toBe("Missing Required Field, Body or Username");
+  });
 });
 
 describe("DELETE /api/comments/:comment_id", () => {
   test("status 204, deletes comment from database", async () => {
-    const res = await request(app)
-    .delete("/api/comments/2")
-    .expect(204)
-  })
+    const res = await request(app).delete("/api/comments/2").expect(204);
+  });
 
   test("status 404, non existent ID", async () => {
-    const res = await request(app)
-    .delete("/api/comments/99999")
-    .expect(404)
-    expect(res.body.msg).toBe("Comment Not Found")
-  })
+    const res = await request(app).delete("/api/comments/99999").expect(404);
+    expect(res.body.msg).toBe("Comment Not Found");
+  });
 
   test("status 400, invalid ID", async () => {
-    const res = await request(app)
-  .delete("/api/comments/notanid")
-  .expect(400)
-  expect(res.body.msg).toBe("Invalid Server Request Made, Expected Number Not String")
-  })
-})
+    const res = await request(app).delete("/api/comments/notanid").expect(400);
+    expect(res.body.msg).toBe(
+      "Invalid Server Request Made, Expected Number Not String"
+    );
+  });
+});
 
-describe("GET /api", () => {
+describe.only("GET /api", () => {
   test("status 200: returns JSON describing all endpoints", async () => {
-    const res = await request(app).get('/api').expect(200)
+    const res = await request(app).get("/api").expect(200);
+    console.log(obj);
     expect(res.body.endpoints).toBeInstanceOf(Object);
-    expect(res.body.endpoints).toEqual(expect.objectContaining({
-      "GET /api": expect.any(Object),
-      "GET /api/topics": expect.any(Object),
-      "GET /api/articles": expect.any(Object),
-      "PATCH /api/articles/:article_id": expect.any(Object),
-      "GET /api/articles/:article_id/comments": expect.any(Object),
-      "POST /api/articles/:article_id/comments": expect.any(Object),
-      "DELETE /api/comments/:comment_id": expect.any(Object),
-    }))
-  })
-})
+    expect(res.body.endpoints).toEqual(
+      expect.objectContaining({
+        "GET /api": expect.any(Object),
+        "GET /api/topics": expect.any(Object),
+        "GET /api/articles": expect.any(Object),
+        "PATCH /api/articles/:article_id": expect.any(Object),
+        "GET /api/articles/:article_id/comments": expect.any(Object),
+        "POST /api/articles/:article_id/comments": expect.any(Object),
+        "DELETE /api/comments/:comment_id": expect.any(Object),
+      })
+    );
+  });
+});
 
 describe("GET /api/users", () => {
   test("status 200, responds with array of user objects", async () => {
-    const res = await request(app).get("/api/users").expect(200)
-    expect(res.body).toBeInstanceOf(Array)
-    expect(res.body)
-  })
-})
+    const res = await request(app).get("/api/users").expect(200);
+    const { users } = res.body;
+    expect(users).toBeInstanceOf(Array);
+    expect(users).toHaveLength(4);
+    users.forEach((user) => {
+      expect(user).toEqual(
+        expect.objectContaining({
+          avatar_url: expect.any(String),
+          name: expect.any(String),
+          username: expect.any(String),
+        })
+      );
+    });
+  });
+
+  test("status 404: responds with 404 when passed an incorrect path", async () => {
+    const res = await request(app).get("/api/abusers").expect(404);
+    console.log(res.body.msg);
+    expect;
+  });
+});
