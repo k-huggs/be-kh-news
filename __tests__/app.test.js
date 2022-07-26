@@ -55,7 +55,7 @@ describe("GET /api/articles/:article_id", () => {
 });
 
 describe("PATCH /api/articles/:article_id", () => {
-  test("status 200: Request body accepts an object with update to votes, the updated article is returned", async () => {
+  test("status 200: request body accepts an object with update to votes, the updated article is returned", async () => {
     const body = { inc_votes: 1 };
     const res = await request(app)
       .patch("/api/articles/1")
@@ -74,7 +74,7 @@ describe("PATCH /api/articles/:article_id", () => {
     );
   });
 
-  test("status 200: Request body accepts an empty object and returns the original article unchanged", async () => {
+  test("status 200: request body accepts an empty object and returns the original article unchanged", async () => {
     const body = {};
     const res = await request(app)
       .patch("/api/articles/1")
@@ -93,7 +93,7 @@ describe("PATCH /api/articles/:article_id", () => {
     );
   });
 
-  test("status 200: Request body accepts an object with update to votes, the updated article is returned", async () => {
+  test("status 200: request body accepts an object with update to votes, the updated article is returned", async () => {
     const body = { inc_votes: -100 };
     const res = await request(app)
       .patch("/api/articles/1")
@@ -144,10 +144,9 @@ describe("PATCH /api/articles/:article_id", () => {
   });
 });
 
-describe.only("GET /api/articles", () => {
+describe("GET /api/articles", () => {
   test("status 200: responds with an array of article objects, which can be sorted by column but defaults to date", async () => {
     const res = await request(app).get("/api/articles").expect(200);
-    console.log(res.body.articles);
     expect(res.body.articles).toBeSorted();
     expect(Array.isArray(res.body.articles)).toBe(true);
     res.body.articles.forEach((articles) => {
@@ -222,34 +221,25 @@ describe.only("GET /api/articles", () => {
     );
   });
 
-  test("status 400: return Invalid Sort Query, when sort value is not a column in the table", () => {
-    return request(app)
+  test("status 400: return Invalid Sort Query, when sort value is not a column in the table", async () => {
+    const res = await request(app)
       .get("/api/articles?sort_by=Luiz")
-      .expect(400)
-      .then(({ body }) => {
-        const { msg } = body;
-        expect(msg).toBe("Invalid Sort Query");
-      });
+      .expect(400);
+    expect(res.body.msg).toBe("Invalid Sort Query");
   });
 
-  test("status 400: returns Invalid Order Query, when order isn't ASC or DESC", () => {
-    return request(app)
+  test("status 400: returns Invalid Order Query, when order isn't ASC or DESC", async () => {
+    const res = await request(app)
       .get("/api/articles?sort_by=topic&order=Mbappe")
-      .expect(400)
-      .then(({ body }) => {
-        const { msg } = body;
-        expect(msg).toBe("Invalid Order Query");
-      });
+      .expect(400);
+    expect(res.body.msg).toBe("Invalid Order Query");
   });
 
-  test("status 404: returns Topic Not Found when an invalid topic is passed", () => {
-    return request(app)
+  test("status 404: returns Topic Not Found when an invalid topic is passed", async () => {
+    const res = await request(app)
       .get("/api/articles?topic=Chri52v^£2sNolan")
-      .expect(404)
-      .then(({ body }) => {
-        const { msg } = body;
-        expect(msg).toBe("Topic Not Found");
-      });
+      .expect(404);
+    expect(res.body.msg).toBe("Topic Not Found");
   });
 });
 
@@ -297,9 +287,9 @@ describe("POST /api/articles/:article_id/comments", () => {
       .send(body)
       .expect(201);
     const { newComment } = res.body;
-    console.log(newComment);
     expect(newComment.body).toBe("it's lit y'all");
   });
+
   test("status 201, accepts an object with unnecessary properties and returns the posted comment", async () => {
     const body = { username: "lurker", body: "it's lit y'all", id: 2 };
     const res = await request(app)
@@ -309,6 +299,7 @@ describe("POST /api/articles/:article_id/comments", () => {
     const { newComment } = res.body;
     expect(newComment.body).toBe("it's lit y'all");
   });
+
   test("status 400, invalid ID, e.g. string of 'not and ID'", async () => {
     const body = { username: "lurker", body: "new fit just dropped" };
     const res = await request(app)
@@ -319,6 +310,7 @@ describe("POST /api/articles/:article_id/comments", () => {
       "Invalid Server Request Made, Expected Number Not String"
     );
   });
+
   test("status 404, non existant ID, i.e. 0 or 90000", async () => {
     const body = { username: "lurker", body: "new fit just dropped" };
     const res = await request(app)
@@ -341,6 +333,7 @@ describe("POST /api/articles/:article_id/comments", () => {
 describe("DELETE /api/comments/:comment_id", () => {
   test("status 204, deletes comment from database", async () => {
     const res = await request(app).delete("/api/comments/2").expect(204);
+    expect(res.statusCode).toBe(204);
   });
 
   test("status 404, non existent ID", async () => {
@@ -356,10 +349,9 @@ describe("DELETE /api/comments/:comment_id", () => {
   });
 });
 
-describe.only("GET /api", () => {
-  test("status 200: returns JSON describing all endpoints", async () => {
+describe("GET /api", () => {
+  test("status 200, returns JSON describing all endpoints", async () => {
     const res = await request(app).get("/api").expect(200);
-    console.log(obj);
     expect(res.body.endpoints).toBeInstanceOf(Object);
     expect(res.body.endpoints).toEqual(
       expect.objectContaining({
@@ -392,9 +384,79 @@ describe("GET /api/users", () => {
     });
   });
 
-  test("status 404: responds with 404 when passed an incorrect path", async () => {
-    const res = await request(app).get("/api/abusers").expect(404);
-    console.log(res.body.msg);
-    expect;
+  test("status 404, responds with 404 when passed an incorrect path", async () => {
+    const res = await request(app).get("/api/powercoders").expect(404);
+    expect(res.body.msg).toBe("URL Route Has Not Been Found");
   });
 });
+
+describe("GET /api/users/:username", () => {
+  test("status 200, responds with a user object", async () => {
+    const res = await request(app).get("/api/users/butter_bridge").expect(200);
+    const { user } = res.body;
+    expect(user).toEqual({
+      avatar_url:
+        "https://www.healthytherapies.com/wp-content/uploads/2016/06/Lime3.jpg",
+      name: "jonny",
+      username: "butter_bridge",
+    });
+  });
+
+  test("status 404, non existent user", async () => {
+    const res = await request(app).get("/api/users/lewishamilton").expect(404);
+    expect(res.body.msg).toBe("Invalid Username");
+  });
+
+  /**
+   * !What is a 400 - can you have an invalid ID for a username?
+   */
+});
+
+describe.only("PATCH /api/comments/:comment_id", () => {
+  test("status 200, updated single comment object", async () => {
+    const body = { body: "updated with this comment" };
+    const res = await request(app)
+      .patch("/api/comments/1")
+      .send(body)
+      .expect(200);
+    expect(res.body.updatedComment).toEqual(
+      expect.objectContaining({
+        body: "updated with this comment",
+        votes: 16,
+        author: "butter_bridge",
+        article_id: 9,
+        created_at: expect.any(String),
+      })
+    );
+  });
+
+  test("status 400, when given an invalid ID", async () => {
+    const body = { body: "updated with this comment" };
+    const res = await request(app)
+      .patch("/api/comments/not-an-id")
+      .send(body)
+      .expect(400);
+    expect(res.body.msg).toBe(
+      "Invalid Server Request Made, Expected Number Not String"
+    );
+  });
+
+  test.only("status 400, when given an incorrect data type", async () => {
+    const body = { inc_votes: 1039 };
+    const res = await request(app)
+      .patch("/api/comments/5")
+      .send(body)
+      .expect(400);
+    expect(res.body.msg).toBe(
+      "Invalid Server Request Made, Expected Number Not String"
+    );
+  });
+});
+/**
+ * ? Additional Endpoints
+ *
+ * - PATCH /api/comments/:comment_id
+ * - POST /api/articles
+ * - POST /api/topics
+ * - DELETE /api/articles/:article_id
+ */
