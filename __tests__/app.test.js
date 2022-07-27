@@ -11,6 +11,7 @@ afterAll(() => db.end());
 describe("GET /api/topics", () => {
   test("status 200: returns an array of topics objects with the properties of slug and description", async () => {
     const res = await request(app).get("/api/topics").expect(200);
+
     expect(res.body.topics).toBeInstanceOf(Array);
     expect(res.body.topics).toHaveLength(3);
     res.body.topics.forEach((res) => {
@@ -23,37 +24,6 @@ describe("GET /api/topics", () => {
     });
   });
 });
-
-describe("GET /api/articles/:article_id", () => {
-  test("status 200: article object specified by the article id returned, with additional comment_count included", async () => {
-    const res = await request(app).get("/api/articles/1").expect(200);
-    expect(res.body.article).toBeInstanceOf(Object);
-    expect(res.body.article).toEqual(
-      expect.objectContaining({
-        title: "Living in the shadow of a great man",
-        topic: "mitch",
-        author: "butter_bridge",
-        body: "I find this existence challenging",
-        created_at: expect.any(String),
-        votes: 100,
-        comment_count: expect.any(Number),
-      })
-    );
-  });
-
-  test("status 404: error handler responds with a message when article id entered is not in the system", async () => {
-    const res = await request(app).get("/api/articles/123456").expect(404);
-    expect(res.body.msg).toBe("Article Id Not Found");
-  });
-
-  test("status 400: error handler responds with a message when non-official article id entered", async () => {
-    const res = await request(app).get("/api/articles/borat").expect(400);
-    expect(res.body.msg).toBe(
-      "Invalid Server Request Made, Expected Number Not String"
-    );
-  });
-});
-
 describe("PATCH /api/articles/:article_id", () => {
   test("status 200: request body accepts an object with update to votes, the updated article is returned", async () => {
     const body = { inc_votes: 1 };
@@ -138,6 +108,85 @@ describe("PATCH /api/articles/:article_id", () => {
       .patch("/api/articles/borat")
       .send(body)
       .expect(400);
+    expect(res.body.msg).toBe(
+      "Invalid Server Request Made, Expected Number Not String"
+    );
+  });
+});
+describe("POST /api/articles/:article_id/comments", () => {
+  test("status 201, accepts an object with the username and comment body and responds with the posted comment", async () => {
+    const body = { username: "lurker", body: "it's lit y'all" };
+    const res = await request(app)
+      .post("/api/articles/2/comments")
+      .send(body)
+      .expect(201);
+    const { newComment } = res.body;
+    expect(newComment.body).toBe("it's lit y'all");
+  });
+
+  test("status 201, accepts an object with unnecessary properties and returns the posted comment", async () => {
+    const body = { username: "lurker", body: "it's lit y'all", id: 2 };
+    const res = await request(app)
+      .post("/api/articles/2/comments")
+      .send(body)
+      .expect(201);
+    const { newComment } = res.body;
+    expect(newComment.body).toBe("it's lit y'all");
+  });
+
+  test("status 400, invalid ID, e.g. string of 'not and ID'", async () => {
+    const body = { username: "lurker", body: "new fit just dropped" };
+    const res = await request(app)
+      .post("/api/articles/notanID/comments")
+      .send(body)
+      .expect(400);
+    expect(res.body.msg).toBe(
+      "Invalid Server Request Made, Expected Number Not String"
+    );
+  });
+
+  test("status 404, non existant ID, i.e. 0 or 90000", async () => {
+    const body = { username: "lurker", body: "new fit just dropped" };
+    const res = await request(app)
+      .post("/api/articles/9000/comments")
+      .send(body)
+      .expect(404);
+    expect(res.body.msg).toBe("Not Found");
+  });
+
+  test("status 400, missing required fields e.g. no username or body", async () => {
+    const body = { username: "lurker" };
+    const res = await request(app)
+      .post("/api/articles/2/comments")
+      .send(body)
+      .expect(400);
+    expect(res.body.msg).toBe("Missing Required Field, Body or Username");
+  });
+});
+describe("GET /api/articles/:article_id", () => {
+  test("status 200: article object specified by the article id returned, with additional comment_count included", async () => {
+    const res = await request(app).get("/api/articles/1").expect(200);
+    expect(res.body.article).toBeInstanceOf(Object);
+    expect(res.body.article).toEqual(
+      expect.objectContaining({
+        title: "Living in the shadow of a great man",
+        topic: "mitch",
+        author: "butter_bridge",
+        body: "I find this existence challenging",
+        created_at: expect.any(String),
+        votes: 100,
+        comment_count: expect.any(Number),
+      })
+    );
+  });
+
+  test("status 404: error handler responds with a message when article id entered is not in the system", async () => {
+    const res = await request(app).get("/api/articles/123456").expect(404);
+    expect(res.body.msg).toBe("Article Id Not Found");
+  });
+
+  test("status 400: error handler responds with a message when non-official article id entered", async () => {
+    const res = await request(app).get("/api/articles/borat").expect(400);
     expect(res.body.msg).toBe(
       "Invalid Server Request Made, Expected Number Not String"
     );
@@ -279,61 +328,9 @@ describe("GET /api/articles/:article_id/comments", () => {
   });
 });
 
-describe("POST /api/articles/:article_id/comments", () => {
-  test("status 201, accepts an object with the username and comment body and responds with the posted comment", async () => {
-    const body = { username: "lurker", body: "it's lit y'all" };
-    const res = await request(app)
-      .post("/api/articles/2/comments")
-      .send(body)
-      .expect(201);
-    const { newComment } = res.body;
-    expect(newComment.body).toBe("it's lit y'all");
-  });
-
-  test("status 201, accepts an object with unnecessary properties and returns the posted comment", async () => {
-    const body = { username: "lurker", body: "it's lit y'all", id: 2 };
-    const res = await request(app)
-      .post("/api/articles/2/comments")
-      .send(body)
-      .expect(201);
-    const { newComment } = res.body;
-    expect(newComment.body).toBe("it's lit y'all");
-  });
-
-  test("status 400, invalid ID, e.g. string of 'not and ID'", async () => {
-    const body = { username: "lurker", body: "new fit just dropped" };
-    const res = await request(app)
-      .post("/api/articles/notanID/comments")
-      .send(body)
-      .expect(400);
-    expect(res.body.msg).toBe(
-      "Invalid Server Request Made, Expected Number Not String"
-    );
-  });
-
-  test("status 404, non existant ID, i.e. 0 or 90000", async () => {
-    const body = { username: "lurker", body: "new fit just dropped" };
-    const res = await request(app)
-      .post("/api/articles/9000/comments")
-      .send(body)
-      .expect(404);
-    expect(res.body.msg).toBe("Not Found");
-  });
-
-  test("status 400, missing required fields e.g. no username or body", async () => {
-    const body = { username: "lurker" };
-    const res = await request(app)
-      .post("/api/articles/2/comments")
-      .send(body)
-      .expect(400);
-    expect(res.body.msg).toBe("Missing Required Field, Body or Username");
-  });
-});
-
 describe("DELETE /api/comments/:comment_id", () => {
   test("status 204, deletes comment from database", async () => {
     const res = await request(app).delete("/api/comments/2").expect(204);
-    expect(res.statusCode).toBe(204);
   });
 
   test("status 404, non existent ID", async () => {
@@ -412,17 +409,18 @@ describe("GET /api/users/:username", () => {
    */
 });
 
-describe.only("PATCH /api/comments/:comment_id", () => {
-  test("status 200, updated single comment object", async () => {
-    const body = { body: "updated with this comment" };
+describe("PATCH /api/comments/:comment_id", () => {
+  test("status 200: request body accepts an object with update to votes, the updated article is returned", async () => {
+    const body = { inc_votes: 1 };
     const res = await request(app)
       .patch("/api/comments/1")
       .send(body)
       .expect(200);
+
     expect(res.body.updatedComment).toEqual(
       expect.objectContaining({
-        body: "updated with this comment",
-        votes: 16,
+        body: "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!",
+        votes: 17,
         author: "butter_bridge",
         article_id: 9,
         created_at: expect.any(String),
@@ -431,7 +429,7 @@ describe.only("PATCH /api/comments/:comment_id", () => {
   });
 
   test("status 400, when given an invalid ID", async () => {
-    const body = { body: "updated with this comment" };
+    const body = { inc_votes: 2 };
     const res = await request(app)
       .patch("/api/comments/not-an-id")
       .send(body)
@@ -441,14 +439,41 @@ describe.only("PATCH /api/comments/:comment_id", () => {
     );
   });
 
-  test.only("status 400, when given an incorrect data type", async () => {
-    const body = { inc_votes: 1039 };
+  test("status 400, when given an incorrect data type", async () => {
+    const body = { inc_votes: "not votes" };
     const res = await request(app)
       .patch("/api/comments/5")
       .send(body)
       .expect(400);
     expect(res.body.msg).toBe(
       "Invalid Server Request Made, Expected Number Not String"
+    );
+  });
+
+  test("status 404, non existent ID of comment", async () => {
+    const body = { inc_votes: 1 };
+    const res = await request(app)
+      .patch("/api/comments/12030402")
+      .send(body)
+      .expect(404);
+    expect(res.body.msg).toBe("Comment Id Not Found");
+  });
+
+  test("status 200, missing inc_votes key, does not have an effect to comment", async () => {
+    const body = { body: "update the comment still" };
+    const res = await request(app)
+      .patch("/api/comments/1")
+      .send(body)
+      .expect(200);
+    console.log(res.body);
+    expect(res.body.updatedComment).toEqual(
+      expect.objectContaining({
+        body: "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!",
+        votes: 16,
+        author: "butter_bridge",
+        article_id: 9,
+        created_at: expect.any(String),
+      })
     );
   });
 });

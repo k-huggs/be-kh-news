@@ -11,7 +11,6 @@ const {
 
 app.use("/api", apiRouter);
 
-
 app.use("*", handleCustomErrors);
 app.use(handlePSQLErrors);
 app.use("/*", handleRouteNotFoundErrors);
