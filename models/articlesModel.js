@@ -60,3 +60,10 @@ exports.selectArticles = async (sort = "created_at", order = "DESC", topic) => {
   const res = await db.query(format(queryStr, topic));
   return res.rows;
 };
+
+exports.removeArticleByArticleId = async (articleId) => {
+  const res = await db.query(`DELETE FROM articles WHERE article_id = $1`, [
+    articleId,
+  ]);
+  return res.rows;
+};

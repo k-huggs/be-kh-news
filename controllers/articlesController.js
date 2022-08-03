@@ -3,6 +3,7 @@ const {
   checkArticleId,
   updateVotesByArticleId,
   selectArticles,
+  removeArticleByArticleId,
 } = require("../models/articlesModel");
 
 const { checkTopics } = require("../models/topicsModel");
@@ -46,6 +47,19 @@ exports.getArticles = async (req, res, next) => {
     ]);
 
     res.status(200).send({ articles });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.deleteArticleByArticleId = async (req, res, next) => {
+  try {
+    const articleId = req.params.article_id;
+    const deletedArticle = await Promise.all([
+      checkArticleId(articleId),
+      removeArticleByArticleId(articleId),
+    ]);
+    res.sendStatus(204);
   } catch (err) {
     next(err);
   }

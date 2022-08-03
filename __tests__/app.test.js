@@ -61,6 +61,7 @@ describe("GET /api/articles/:article_id", () => {
     );
   });
 });
+
 describe("PATCH /api/articles/:article_id", () => {
   test("status 200: request body accepts an object with update to votes, the updated article is returned", async () => {
     const body = { inc_votes: 1 };
@@ -519,18 +520,39 @@ describe("POST /api/users", () => {
   });
 });
 
+describe("POST /api/articles", () => {
+  test("status 201 repsonds", () => {});
+});
+
+describe("POST /api/topics", () => {});
+
+describe("DELETE /api/articles/:article_id", () => {
+  test("status 204, deletes article specified by article_id from database", async () => {
+    const res = await request(app).delete(`/api/articles/1`).expect(204);
+    expect(res.body).toEqual({});
+  });
+
+  test("status 404, article_id does not exist", async () => {
+    const res = await request(app).delete(`/api/articles/123456`).expect(404);
+    expect(res.body.msg).toBe("Article Id Not Found");
+  });
+
+  test("status 400, invalid article_id provided", async () => {
+    const res = await request(app)
+      .delete(`/api/articles/not-an-id`)
+      .expect(400);
+    expect(res.body.msg).toBe(
+      "Invalid Server Request Made, Expected Number Not String"
+    );
+  });
+});
+
 /**
  * ? Additional Endpoints
  *
  *
  * @POST /api/articles
  * @POST /api/topics
- * @DELETE /api/articles/:article_id
- * @POST /api/users - add a user
- *
- *
- *
- *
  * @PATCH /api/articles/article_id - review_body
  * @PATCH /api/articles/comments/comment_id - comment body
  * @PATCH /api/users/:username - user info
