@@ -36,7 +36,7 @@ exports.addCommentByArticleId = async (username, comment, articleId) => {
 };
 
 exports.removeCommentByCommentId = async (commentId) => {
-  const numberOfDeletions = await await db.query(
+  const numberOfDeletions = await db.query(
     `DELETE FROM comments WHERE comment_id = $1`,
     [commentId]
   );

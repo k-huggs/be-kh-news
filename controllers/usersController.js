@@ -2,6 +2,7 @@ const {
   fetchUsers,
   fetchUserByUsername,
   checkUsernameExists,
+  addUser,
 } = require("../models/usersModel");
 
 exports.getUsers = async (req, res, next) => {
@@ -22,6 +23,17 @@ exports.getUserByUsername = async (req, res, next) => {
     ]);
     res.status(200).send({ user });
   } catch (err) {
+    next(err);
+  }
+};
+
+exports.postUser = async (req, res, next) => {
+  try {
+    const { username, name, avatar_url } = req.body;
+    const newUser = await addUser(username, name, avatar_url);
+    res.status(201).send({ newUser });
+  } catch (err) {
+    console.log(err);
     next(err);
   }
 };
