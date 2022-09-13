@@ -14,6 +14,14 @@ exports.checkTopics = async (topic) => {
 
 exports.selectTopics = async () => {
   const res = await db.query(`SELECT * FROM topics`);
-
   return res.rows;
+};
+
+exports.addTopic = async (slug, description) => {
+  const res = await db.query(
+    `INSERT INTO topics (slug, description) VALUES ($1, $2) RETURNING *`,
+    [slug, description]
+  );
+
+  return res.rows[0];
 };

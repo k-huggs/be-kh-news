@@ -413,10 +413,6 @@ describe("GET /api/users/:username", () => {
     const res = await request(app).get("/api/users/lewishamilton").expect(404);
     expect(res.body.msg).toBe("Invalid Username");
   });
-
-  /**
-   * !What is a 400 - can you have an invalid ID for a username?
-   */
 });
 
 describe("PATCH /api/comments/:comment_id", () => {
@@ -520,11 +516,106 @@ describe("POST /api/users", () => {
   });
 });
 
-describe("POST /api/articles", () => {
-  test("status 201 repsonds", () => {});
-});
+// describe("POST /api/articles", () => {
+//   test("status 201, adds a new article to the database", async () => {
+//     const body = {
+//       title: "New Article",
+//       topic: "mitch",
+//       author: "butter_bridge",
+//       body: "we adding new articles right now it's lit",
+//       created_at: new Date(),
+//       votes: 0,
+//     };
+//     const res = await request(app).post(`/api/articles`).send(body).expect(201);
+//     expect(res.body.addedArticle).toEqual(
+//       expect.objectContaining({
+//         title: "New Article",
+//         topic: "mitch",
+//         author: "butter_bridge",
+//         body: "we adding new articles right now it's lit",
+//         created_at: expect.any(String),
+//         votes: 0,
+//       })
+//     );
+//   });
 
-describe("POST /api/topics", () => {});
+//   test("status 400, body missing properties creates a bad request", async () => {
+//     const body = {
+//       title: "New Article",
+//       topic: "mitch",
+//       author: "butter_bridge",
+//       created_at: new Date(),
+//       votes: 0,
+//     };
+//     const res = await request(app).post(`/api/articles`).send(body).expect(400);
+//     expect(res.body.msg).toBe("Missing fields from post");
+//   });
+
+//   test("status 404, author is not a valid author", async () => {
+//     const body = {
+//       title: "New Article",
+//       topic: "mitch",
+//       author: "not-an-author",
+//       body: "we adding new articles right now it's lit",
+//       created_at: new Date(),
+//       votes: 0,
+//     };
+//     const res = await request(app).post(`/api/articles`).send(body).expect(404);
+//     expect(res.body.msg).toBe("Invalid topic or author field");
+//   });
+
+//   test("status 404, topic is not a valid topic", async () => {
+//     const body = {
+//       title: "New Article",
+//       topic: "not-a-topic",
+//       author: "butter_bridge",
+//       body: "we adding new articles right now it's lit",
+//       created_at: new Date(),
+//       votes: 0,
+//     };
+//     const res = await request(app).post(`/api/articles`).send(body).expect(404);
+//     expect(res.body.msg).toBe("Invalid topic or author field");
+//   });
+// });
+
+describe("POST /api/topics", () => {
+  test("status 201, adds a new topic to the database", async () => {
+    const topicBody = {
+      description: "fresh topic for the masses",
+      slug: "brand new funk",
+    };
+    const res = await request(app)
+      .post(`/api/topics`)
+      .send(topicBody)
+      .expect(201);
+    expect(res.body.addedTopic).toEqual({
+      description: "fresh topic for the masses",
+      slug: "brand new funk",
+    });
+  });
+
+  test("status 400, missing slug from request body", async () => {
+    const topicBody = {
+      description: "fresh topic for the masses",
+    };
+    const res = await request(app)
+      .post(`/api/topics`)
+      .send(topicBody)
+      .expect(400);
+    expect(res.body.msg).toBe("Missing slug or description");
+  });
+
+  test("status 400, missing description from request body", async () => {
+    const topicBody = {
+      slug: "new topic",
+    };
+    const res = await request(app)
+      .post(`/api/topics`)
+      .send(topicBody)
+      .expect(400);
+    expect(res.body.msg).toBe("Missing slug or description");
+  });
+});
 
 describe("DELETE /api/articles/:article_id", () => {
   test("status 204, deletes article specified by article_id from database", async () => {
