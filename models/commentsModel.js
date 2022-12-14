@@ -1,11 +1,11 @@
-const db = require("../db/connection");
+const db = require('../db/connection');
 
 exports.checkCommentsId = async (commentId) => {
   const res = await db.query(`SELECT * FROM comments WHERE comment_id = $1`, [
     commentId,
   ]);
   if (res.rows.length === 0) {
-    return Promise.reject({ status: 404, msg: "Comment Id Not Found" });
+    return Promise.reject({ status: 404, msg: 'Comment Id Not Found' });
   }
 };
 
@@ -21,7 +21,7 @@ exports.addCommentByArticleId = async (username, comment, articleId) => {
   if (!username || !comment) {
     return await Promise.reject({
       status: 400,
-      msg: "Missing Required Field, Body or Username",
+      msg: 'Missing Required Field, Body or Username',
     });
   }
 
@@ -30,7 +30,7 @@ exports.addCommentByArticleId = async (username, comment, articleId) => {
     [username, comment, articleId]
   );
   if (res.rows.length === 0) {
-    Promise.reject({ status: 404, msg: "URL Route Has Not Been Found" });
+    Promise.reject({ status: 404, msg: 'URL Route Has Not Been Found' });
   }
   return res.rows[0];
 };
@@ -41,12 +41,11 @@ exports.removeCommentByCommentId = async (commentId) => {
     [commentId]
   );
   if (numberOfDeletions.rowCount === 0) {
-    return Promise.reject({ status: 404, msg: "Comment Not Found" });
+    return Promise.reject({ status: 404, msg: 'Comment Not Found' });
   }
 };
 
 exports.updateCommentByCommentId = async (commentId, inc_votes = 0) => {
-  console.log(inc_votes);
   const res = await db.query(
     `
   UPDATE comments 

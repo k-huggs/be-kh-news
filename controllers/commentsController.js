@@ -1,11 +1,11 @@
-const { checkArticleId } = require("../models/articlesModel");
+const { checkArticleId } = require('../models/articlesModel');
 const {
   selectCommentsByArticleId,
   addCommentByArticleId,
   removeCommentByCommentId,
   updateCommentByCommentId,
   checkCommentsId,
-} = require("../models/commentsModel");
+} = require('../models/commentsModel');
 
 exports.getCommentsByArticleId = async (req, res, next) => {
   try {
@@ -45,7 +45,6 @@ exports.deleteCommentByCommentId = async (req, res, next) => {
 
 exports.patchCommentByCommentId = async (req, res, next) => {
   try {
-    console.log(req.body);
     const commentId = req.params.comment_id;
     const { inc_votes } = req.body;
     const [updatedComment, check] = await Promise.all([

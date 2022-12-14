@@ -3,7 +3,7 @@ const {
   fetchUserByUsername,
   checkUsernameExists,
   addUser,
-} = require("../models/usersModel");
+} = require('../models/usersModel');
 
 exports.getUsers = async (req, res, next) => {
   try {
@@ -33,7 +33,6 @@ exports.postUser = async (req, res, next) => {
     const newUser = await addUser(username, name, avatar_url);
     res.status(201).send({ newUser });
   } catch (err) {
-    console.log(err);
     next(err);
   }
 };
